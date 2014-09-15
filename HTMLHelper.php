@@ -124,22 +124,20 @@ interface TableUIDatasource{
 }	
 
 class ExampleTableDatasource implements TableUIDatasource{
-	var $rows;
+	var $rows = [ ];
 
 	function __construct($table){
-		$row1 = new TableRowUI($table);
-		$row2 = new TableRowUI($table);
+		for($i = 0; $i < 1000; $i++){
+			$row = new TableRowUI($table);
+			$cell1 = new TableCellUI($row);
+			$cell2 = new TableCellUI($row);
 
-		$cell1 = new TableCellUI($row1);
-		$cell1->innerHTML = "This is cell1";
-
-		$cell2 = new TableCellUI($row2);
-		$cell2->innerHTML = "This is cell2";
-
-		$row1->tableCells = [ $cell1, $cell2 ];
-		$row2->tableCells = [ $cell1, $cell2 ];
-		$this->rows = [ $row1, $row2 ];
-
+			$cell1->innerHTML = "This is cell".($i++ +1);
+			$cell2->innerHTML = "This is cell".($i+1);
+			
+			$row->tableCells = [ $cell1, $cell2 ];
+			array_push($this->rows, $row);
+		}
 	}
 
 	function rowOutputForIndex($index){
