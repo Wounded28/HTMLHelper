@@ -69,43 +69,42 @@ class HtmlAttribute{
 }
 
 class TableUI extends HTMLSource{
-	var $rows = 2;
-	var $columns = 2;
+	var $tableRows; 
 
 	function output(){
 		$attribute = (new HtmlAttribute)->output();
 		$r = $this->addTabs("<table ".$attribute.">").EOL;
-		for($i = 0; $i < $this->rows; $i++){
-			$row = new TableRowUI($this);
-			$row->iColumns = $this->columns;
+
+		foreach($this->tableRows as $row){
 			$r .= $row->output();
 		}
+
 		$r .= $this->addTabs("</table>").EOL;
 		return $r;
 	}
 }
 
 class TableRowUI extends HTMLSource{
-	var $iColumns = 2;
+	var $tableCells;
 
 	function output(){
 		$r = $this->addTabs("<tr>").EOL;
-		for($i = 0; $i < $this->iColumns; $i++){
-			$cell = new TableCellUI($this);
-			$r .= $cell->output("This is a column");
+
+		foreach($this->tableCells as $cell){
+			$r .= $cell->output();
 		}
+
 		$r .= $this->addTabs("</tr>").EOL;
 		return $r;
 	}
 }
 
 class TableCellUI extends HTMLSource{
-	var $colspan = 0;
-	var $rowspan = 0;
+	var $innerHTML = "Empty cell";
 	
-	function output($innerHTML){
+	function output(){
 		$r = $this->addTabs("<td>");
-		$r .= $innerHTML;
+		$r .= $this->innerHTML;
 		$r .= "</td>".EOL;
 		return $r;
 	}
@@ -129,6 +128,22 @@ class TableCellUI extends HTMLSource{
 <?php
 	$table = new TableUI(null);
 	$table->tabcount = 1;
+
+	$row1 = new TableRowUI($table);
+	$row2 = new TableRowUI($table);
+
+	$cell1 = new TableCellUI($row1);
+	$cell1->innerHTML = "This is cell1";
+
+	$cell2 = new TableCellUI($row2);
+	$cell2->innerHTML = "This is cell2";
+
+	$row1->tableCells = [ $cell1, $cell2 ];
+	$row2->tableCells = [ $cell1, $cell2 ];
+	
+	$cell1->innerHTML = "That is a change";
+	$table->tableRows = [ $row1, $row2 ];
+
 	echo $table->output();
 ?>
 </body>
