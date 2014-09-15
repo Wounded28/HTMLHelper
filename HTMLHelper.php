@@ -70,13 +70,21 @@ class HtmlAttribute{
 
 class TableUI extends HTMLSource{
 	var $tableRows; 
+	var $datasource;
 
 	function output(){
 		$attribute = (new HtmlAttribute)->output();
 		$r = $this->addTabs("<table ".$attribute.">").EOL;
+		if($this->datasource instanceof TableUIDatasource){
+			for($i = 0; $i < $this->datasource->numberOfRows(); $i++){
+				$r .= $this->datasource->rowOutputForIndex($i);
+			}
+		}
 
-		foreach($this->tableRows as $row){
-			$r .= $row->output();
+		else if(is_array($this->tableRows)){
+			foreach($this->tableRows as $row){
+				$r .= $row->output();
+			}
 		}
 
 		$r .= $this->addTabs("</table>").EOL;
@@ -110,6 +118,39 @@ class TableCellUI extends HTMLSource{
 	}
 }
 
+interface TableUIDatasource{
+	public function rowOutputForIndex($index);
+	public function numberOfRows();
+}	
+
+class ExampleTableDatasource implements TableUIDatasource{
+	var $rows;
+
+	function __construct($table){
+		$row1 = new TableRowUI($table);
+		$row2 = new TableRowUI($table);
+
+		$cell1 = new TableCellUI($row1);
+		$cell1->innerHTML = "This is cell1";
+
+		$cell2 = new TableCellUI($row2);
+		$cell2->innerHTML = "This is cell2";
+
+		$row1->tableCells = [ $cell1, $cell2 ];
+		$row2->tableCells = [ $cell1, $cell2 ];
+		$this->rows = [ $row1, $row2 ];
+
+	}
+
+	function rowOutputForIndex($index){
+		$row = $this->rows[$index];
+		return $row->output();
+	}
+
+	function numberOfRows(){
+		return count($this->rows);
+	}
+}
 ?>
 
 
@@ -129,20 +170,8 @@ class TableCellUI extends HTMLSource{
 	$table = new TableUI(null);
 	$table->tabcount = 1;
 
-	$row1 = new TableRowUI($table);
-	$row2 = new TableRowUI($table);
-
-	$cell1 = new TableCellUI($row1);
-	$cell1->innerHTML = "This is cell1";
-
-	$cell2 = new TableCellUI($row2);
-	$cell2->innerHTML = "This is cell2";
-
-	$row1->tableCells = [ $cell1, $cell2 ];
-	$row2->tableCells = [ $cell1, $cell2 ];
-	
-	$cell1->innerHTML = "That is a change";
-	$table->tableRows = [ $row1, $row2 ];
+	$datasource = new ExampleTableDatasource($table);
+	$table->datasource = &$datasource;
 
 	echo $table->output();
 ?>
