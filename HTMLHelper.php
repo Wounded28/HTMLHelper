@@ -171,8 +171,6 @@ class ExampleTableDatasource implements TableUIDatasource{
 	$table = new TableUI(null);
 	$table->tabcount = 1;
 
-	$test = [ "style" => [ "hello" => "World" ]];
-
 	$attributes = new HTMLAttributes();
 	$attributes->options = [ 	
 								"style" => [ "width" => "100%", "background-color" => "#00FF00" ],
