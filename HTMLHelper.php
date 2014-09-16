@@ -1,6 +1,8 @@
 <?php
-const EOL = PHP_EOL;
-const TAB = "   ";
+const EOL = PHP_EOL; //"";
+const TAB = "   "; //"";
+
+
 
 function tabs($count){
 	$r = "";
@@ -10,9 +12,42 @@ function tabs($count){
 	return $r;
 }
 
+class HTMLAttributes{
+	var $options;
+
+	function output(){
+		$r = "";
+		foreach($this->options as $key => $value){
+			$r .= " ".$key."='";
+			$entry = $value;
+			if(is_array($entry)){
+				foreach($entry as $key => $value){
+					if(is_string($key)){
+						$r .= $key.":".$value."; ";	
+					}
+
+					else if(is_int($key)){
+						$r .= $value." ";
+					}
+					
+				}
+			}
+
+			else if(is_string($entry)){
+				$r .= $entry;
+			}
+			$r = rtrim($r, " ")."'";
+		}
+
+		return $r;
+	}
+}
+
 class HTMLSource{
 	var $tabcount = 0;
 	var $tabincrement = 1;
+	var $attributes;
+	var $innerHTML;
 
 	function __construct($htmlParent){
 		if(is_subclass_of($htmlParent, "HTMLSource")){
@@ -31,47 +66,15 @@ class HTMLSource{
 	}
 }
 
-class HTMLAttributes{
-	var $attributeDict;
-
-	function output(){
-		$r = "";
-		foreach($this->attributeDict as $key => $value){
-			$r .= " ".$key."='";
-			$options = $value;
-			if(is_array($options)){
-				foreach($options as $key => $value){
-					if(is_string($key)){
-						$r .= $key.":".$value."; ";	
-					}
-
-					else if(is_int($key)){
-						$r .= $value." ";
-					}
-					
-				}
-			}
-
-			else if(is_string($options)){
-				$r .= $options;
-			}
-			$r = rtrim($r, " ")."'";
-		}
-
-		return $r;
-	}
-}
-
 class TableUI extends HTMLSource{
-	var $tableRows; 
-	var $htmlAttributes;
+	var $tableRows;
 	var $datasource;
 
 	function output(){
 		$attribute = "";
 
-		if($this->htmlAttributes instanceof HTMLAttributes ){
-			$attribute = $this->htmlAttributes->output();
+		if($this->attributes instanceof HTMLAttributes ){
+			$attribute = $this->attributes->output();
 		}
 
 		$r = $this->addTabs("<table ".$attribute.">").EOL;
@@ -171,12 +174,14 @@ class ExampleTableDatasource implements TableUIDatasource{
 	$test = [ "style" => [ "hello" => "World" ]];
 
 	$attributes = new HTMLAttributes();
-	$attributes->attributeDict = [ 	
-									"style" => [ "width" => "100%", "background-color" => "#00FF00" ],
-					 				"border" =>  "1px solid black"
-					 			 ];
+	$attributes->options = [ 	
+								"style" => [ "width" => "100%", "background-color" => "#00FF00" ],
+					 			"border" =>  "1px solid black",
+					 			"id" => "TableExample",
+								"onclick" => 'alert("Hello World!")'	
+					 		];
 
-	$table->htmlAttributes = $attributes;
+	$table->attributes = $attributes;
 	$datasource = new ExampleTableDatasource($table);
 	$table->datasource = $datasource;
 
