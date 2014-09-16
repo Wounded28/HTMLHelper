@@ -31,20 +31,14 @@ class HTMLSource{
 	}
 }
 
-class HtmlAttribute{
-	var $attrNames = [  0 => "style",
-						1 => "border"];
-	var $attrOptions = [ 0 => [ "width" => "100%",
-					 			"background-color" => "#00FF00" ],
-					 	 1 => [ 0 => "1px", 
-					 	 		1 => "solid",
-					 	 		2 => "black" ] ];
+class HTMLAttributes{
+	var $attributeDict;
 
 	function output(){
-		$r = ""; // $this->name."='";
-		foreach($this->attrNames as $i => $name){
-			$r .= " ".$name."='";
-			$options = $this->attrOptions[$i];
+		$r = "";
+		foreach($this->attributeDict as $key => $value){
+			$r .= " ".$key."='";
+			$options = $value;
 			if(is_array($options)){
 				foreach($options as $key => $value){
 					if(is_string($key)){
@@ -70,10 +64,16 @@ class HtmlAttribute{
 
 class TableUI extends HTMLSource{
 	var $tableRows; 
+	var $htmlAttributes;
 	var $datasource;
 
 	function output(){
-		$attribute = (new HtmlAttribute)->output();
+		$attribute = "";
+
+		if($this->htmlAttributes instanceof HTMLAttributes ){
+			$attribute = $this->htmlAttributes->output();
+		}
+
 		$r = $this->addTabs("<table ".$attribute.">").EOL;
 		if($this->datasource instanceof TableUIDatasource){
 			for($i = 0; $i < $this->datasource->numberOfRows(); $i++){
@@ -131,11 +131,11 @@ class ExampleTableDatasource implements TableUIDatasource{
 			$row = new TableRowUI($table);
 			$cell1 = new TableCellUI($row);
 			$cell2 = new TableCellUI($row);
-
+			$cell3 = new TableCellUI($row);
 			$cell1->innerHTML = "This is cell".($i++ +1);
-			$cell2->innerHTML = "This is cell".($i+1);
-			
-			$row->tableCells = [ $cell1, $cell2 ];
+			$cell2->innerHTML = "This is cell".($i++ +1);
+			$cell3->innerHTML = "This is cell".($i +1);
+			$row->tableCells = [ $cell1, $cell2, $cell3 ];
 			array_push($this->rows, $row);
 		}
 	}
@@ -152,7 +152,7 @@ class ExampleTableDatasource implements TableUIDatasource{
 ?>
 
 
-<!doctype html>
+<!DOCTYPE html>
 
 <html lang="en">
 <head>
@@ -168,8 +168,17 @@ class ExampleTableDatasource implements TableUIDatasource{
 	$table = new TableUI(null);
 	$table->tabcount = 1;
 
+	$test = [ "style" => [ "hello" => "World" ]];
+
+	$attributes = new HTMLAttributes();
+	$attributes->attributeDict = [ 	
+									"style" => [ "width" => "100%", "background-color" => "#00FF00" ],
+					 				"border" =>  "1px solid black"
+					 			 ];
+
+	$table->htmlAttributes = $attributes;
 	$datasource = new ExampleTableDatasource($table);
-	$table->datasource = &$datasource;
+	$table->datasource = $datasource;
 
 	echo $table->output();
 ?>
